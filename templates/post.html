@@ -1,0 +1,61 @@
+{% import 'bootstrap/wtf.html' as wtf %}
+{% include "header.html" %}
+  <!-- Page Header-->
+  <header class="masthead" style="background-image: url({{ req_post.img_url }})">
+    <div class="position-relative px-4 px-lg-5">
+      <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+          <div class="post-heading">
+            <h1>{{ req_post.title }}</h1>
+            <h2 class="subheading">{{ req_post.subtitle }}</h2>
+            <span class="meta">
+              Posted by
+              <a href="#!">{{ req_post.author.username }}</a>
+              on {{ req_post.date }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Post Content-->
+  <article class="mb-4">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        {{ req_post.body |safe }}
+        {% if current_user.id == 1 or current_user.id == req_post.author.id: %}
+          <hr class="my-4" />
+          <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="{{ url_for('edit', post_id=req_post.id) }}">Edit Post →</a></div>
+        {% endif %}
+
+        <div class="col-lg-8 col-md-10 comment">
+          {% if current_user.is_authenticated: %}
+            <hr class="my-4" />
+            {{ ckeditor.load() }}
+            {{ ckeditor.config(name='body') }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={'submit': 'primary'}) }}
+          {% endif %}
+          {% for comment in req_post.comments: %}
+            <ul class="commentList">
+              <li>
+                <div class="commenterImage">
+                  <img src="{{ comment.author.email | gravatar }}"/>
+                </div>
+                <div class="commentText">
+                  {{comment.text | safe}}
+                  <span class="date sub-text">{{comment.author.username}}</span>
+                  {% if current_user.id == 1 or current_user.id == comment.author.id: %}
+                  <a href="{{ url_for('deletecom', comment_id=comment.id) }}">✘</a>
+                  {% endif %}
+                </div>
+              </li>
+            </ul>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </article>
+
+  <!-- Footer-->
+  {% include "footer.html" %}
